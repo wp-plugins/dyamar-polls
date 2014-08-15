@@ -1,0 +1,58 @@
+/*
+
+	DYAMAR Polls - interactive polls for WordPress web sites
+	Copyright (C) 2014  DYAMAR Engineering <info@dyamar.com>
+
+	This program is free software; you can redistribute it and/or
+	modify it under the terms of the GNU General Public License
+	as published by the Free Software Foundation; either version 2
+	of the License, or (at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+*/
+
+.poll-percentage
+{
+	height:30px;
+
+	background: rgb(177,222,249);
+	background: -moz-linear-gradient(top,  rgba(177,222,249,1) 0%, rgba(169,210,243,1) 10%, rgba(144,186,228,1) 25%, rgba(144,188,234,1) 37%, rgba(144,191,240,1) 50%, rgba(107,168,229,1) 51%, rgba(162,218,245,1) 83%, rgba(179,241,252,1) 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(177,222,249,1)), color-stop(10%,rgba(169,210,243,1)), color-stop(25%,rgba(144,186,228,1)), color-stop(37%,rgba(144,188,234,1)), color-stop(50%,rgba(144,191,240,1)), color-stop(51%,rgba(107,168,229,1)), color-stop(83%,rgba(162,218,245,1)), color-stop(100%,rgba(179,241,252,1)));
+	background: -webkit-linear-gradient(top,  rgba(177,222,249,1) 0%,rgba(169,210,243,1) 10%,rgba(144,186,228,1) 25%,rgba(144,188,234,1) 37%,rgba(144,191,240,1) 50%,rgba(107,168,229,1) 51%,rgba(162,218,245,1) 83%,rgba(179,241,252,1) 100%);
+	background: -o-linear-gradient(top,  rgba(177,222,249,1) 0%,rgba(169,210,243,1) 10%,rgba(144,186,228,1) 25%,rgba(144,188,234,1) 37%,rgba(144,191,240,1) 50%,rgba(107,168,229,1) 51%,rgba(162,218,245,1) 83%,rgba(179,241,252,1) 100%);
+	background: -ms-linear-gradient(top,  rgba(177,222,249,1) 0%,rgba(169,210,243,1) 10%,rgba(144,186,228,1) 25%,rgba(144,188,234,1) 37%,rgba(144,191,240,1) 50%,rgba(107,168,229,1) 51%,rgba(162,218,245,1) 83%,rgba(179,241,252,1) 100%);
+	background: linear-gradient(to bottom,  rgba(177,222,249,1) 0%,rgba(169,210,243,1) 10%,rgba(144,186,228,1) 25%,rgba(144,188,234,1) 37%,rgba(144,191,240,1) 50%,rgba(107,168,229,1) 51%,rgba(162,218,245,1) 83%,rgba(179,241,252,1) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b1def9', endColorstr='#b3f1fc',GradientType=0 );
+}
+
+.poll-info-line
+{
+	margin-bottom:15px;
+}
+
+.poll-result
+{
+	font-size:90%;
+}
+
+.poll-info
+{
+	float:left;
+	line-height:30px;
+	margin-left:10px;
+	text-shadow:1px 1px 2px #FFF;
+}
+
+.poll-label
+{
+	padding:0px;
+	margin:0px;
+}
