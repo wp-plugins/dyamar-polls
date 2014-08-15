@@ -7,11 +7,17 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-This plugin allows to add interactive polls on your WordPress web site. You can use shortcuts to place desired questions in a post or in any widget.
+This plugin allows to add interactive polls to your WordPress web site. You can use shortcuts to place desired questions in a post or in any widget.
 
 == Description ==
 
-This plugin allows to add interactive polls on your WordPress web site. You can use shortcuts to place desired questions in a post or in any widget.
+This is a plugin that allows to add interactive and dynamic AJAX polls to your WordPress web site. 
+
+You can use generated shortcuts to place desired questions in a post or in any widget.
+
+There are no any limitations and you can create as much polls or questions as you want.
+
+In addition, it’s possible to set lifetime of the answer. It means that users will not be able to answer several times and you will see better picture of users’ opinions.
 
 == Installation ==
 
