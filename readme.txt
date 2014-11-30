@@ -1,9 +1,9 @@
 === DYAMAR Polls ===
 Contributors: dyamar
-Tags: poll, vote, dyamar, feedback, rating
+Tags: poll, vote, dyamar, feedback, rating, review
 Requires at least: 3.2
-Tested up to: 3.9.2
-Stable tag: 1.0.0
+Tested up to: 4.0.1
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,13 +17,13 @@ You can use generated shortcuts to place desired questions in a post or in any w
 
 There are no any limitations and you can create as much polls or questions as you want.
 
-In addition, it’s possible to set lifetime of the answer. It means that users will not be able to answer several times and you will see better picture of users’ opinions.
+In addition, it's possible to set lifetime of the answer. It means that users will not be able to answer several times and you will see better picture of users' opinions.
 
 == Installation ==
 
 1. Download plugin and unzip.
-2. Upload `dyamar-polls` folder to the `/wp-content/plugins/` directory
-3. Activate the plugin through the 'Plugins' menu in WordPress
+2. Upload `dyamar-polls` folder to the `/wp-content/plugins/` directory.
+3. Activate the plugin through the 'Plugins' menu in WordPress.
 4. Go to the `Polls` admin menu in the back-end are of your site.
 5. Create new poll by clicking on the `Add New Poll` button.
 6. Copy short-code and place it inside of any page or widget.
@@ -44,5 +44,10 @@ Just copy short-code from the admin section of the Poll plugin and paste it into
 
 == Changelog ==
 
+= 1.1.0 =
+* Ability to set different color schemes for polls.
+* Validating form data before saving into database.
+* Included CSS files should have correctly specified media type.
+
 = 1.0 =
-* Initial release of this plugin
+* Initial release of this plugin.

@@ -7,12 +7,12 @@
 	Author: DYAMAR Engineering
 	Author URI: http://dyamar.com/
 	Text Domain: dyamar-polls
-	Version: 1.0.0
+	Version: 1.1.0
 	License: GNU General Public License v2 or later
 	License URI: http://www.gnu.org/licenses/gpl-2.0.html
  */
 
-define("DYAMAR_POLLS_VERSION", "1.0.0");
+define("DYAMAR_POLLS_VERSION", "1.1.0");
 define("DYAMAR_POLLS_ADMIN_PAGE", "dyamar_polls");
 
 // Add actions that are required by our plugin
@@ -24,9 +24,36 @@ add_action('wp_enqueue_scripts', 'dyamar_polls_enqueue_scripts');
 add_action('wp_ajax_dyamar_polls_vote', 'dyamar_polls_vote');
 add_action('wp_ajax_nopriv_dyamar_polls_vote', 'dyamar_polls_vote');
 add_filter('widget_text', 'dyamar_polls_do_shortcode');
+add_action('plugins_loaded', 'dyamar_polls_plugins_loaded');
 
 register_activation_hook(__FILE__, 'dyamar_polls_activate');
 register_uninstall_hook(__FILE__, 'dyamar_polls_uninstall');
+
+function dyamar_polls_plugins_loaded()
+{
+	dyamar_polls_update_db();
+}
+
+function dyamar_polls_update_db()
+{
+	global $wpdb;
+
+	$table_prefix = $wpdb->prefix . 'dyamar_';
+
+	$installed_dyamar_polls_version = get_option("dyamar_polls_version");
+
+	if ($installed_dyamar_polls_version != DYAMAR_POLLS_VERSION)
+	{
+		$columns = $wpdb->get_row('SHOW COLUMNS FROM `' . $table_prefix . 'polls` LIKE \'style\'');
+
+		if (!$columns || !isset($columns->Field) || ($columns->Field != 'style'))
+		{
+			$wpdb->query('ALTER TABLE `' . $table_prefix . 'polls` ADD COLUMN `style` TEXT NOT NULL');
+		}
+
+		update_option("dyamar_polls_version", DYAMAR_POLLS_VERSION);
+	}
+}
 
 function dyamar_polls_admin_scripts($name)
 {
@@ -46,8 +73,8 @@ function dyamar_polls_enqueue_scripts()
 	if (is_archive() || is_single() || is_page() || is_home())
 	{
 		wp_enqueue_script('jquery');
-		wp_enqueue_script('dyamar-polls', plugins_url( '/js/polls.js' , __FILE__ ), array(), DYAMAR_POLLS_VERSION, false);
-		wp_enqueue_style('dyamar-polls', plugins_url( '/css/polls.css' , __FILE__ ), array(), DYAMAR_POLLS_VERSION, false);
+		wp_enqueue_script('dyamar-polls', plugins_url( '/js/polls.js' , __FILE__ ), array(), DYAMAR_POLLS_VERSION);
+		wp_enqueue_style('dyamar-polls', plugins_url( '/css/polls.css' , __FILE__ ), array(), DYAMAR_POLLS_VERSION);
 	}
 }
 
@@ -66,6 +93,7 @@ function dyamar_polls_activate()
 		  `title` varchar(100) NOT NULL,
 		  `max_answers` int(11) NOT NULL,
 		  `lifetime` bigint(20) unsigned NOT NULL,
+		  `style` text NOT NULL,
 		  PRIMARY KEY (`id`)
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 	');
@@ -80,6 +108,8 @@ function dyamar_polls_activate()
 		  KEY `poll_id` (`poll_id`)
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 	');
+
+	dyamar_polls_update_db();
 }
 
 function dyamar_polls_uninstall()
@@ -92,6 +122,8 @@ function dyamar_polls_uninstall()
 
 	$wpdb->query('DROP TABLE IF EXISTS `' . $table_prefix . 'polls`;');
 	$wpdb->query('DROP TABLE IF EXISTS `' . $table_prefix . 'polls_answers`;');
+
+	delete_option("dyamar_polls_version");
 }
 
 function dyamar_polls_init()
@@ -198,8 +230,20 @@ function dyamar_polls_render($poll)
 {
 	$already_voted = trim(strtolower($_COOKIE['POLL_' . $poll['poll']['id'] . '_VOTED'])) == 'yes';
 
+	$theme = "blue";
+
+	if (!empty($poll['poll']['style']))
+	{
+		$styles = unserialize($poll['poll']['style']);
+
+		if (is_array($styles) && !empty($styles['theme']))
+		{
+			$theme = $styles['theme'];
+		}
+	}
+
 ?>
-<div id="dyamar_poll_<?php echo $poll['poll']['id']; ?>" class="dyamar-poll poll-<?php echo $poll['poll']['id']; ?>">
+<div id="dyamar_poll_<?php echo $poll['poll']['id']; ?>" class="dyamar-poll theme-<?php echo $theme; ?> poll-<?php echo $poll['poll']['id']; ?>">
 	<input type="hidden" id="poll_<?php echo $poll['poll']['id']; ?>_lifetime" value="<?php echo $poll['poll']['lifetime']; ?>"/>
 	<div class="title">
 		<p><?php echo $poll['poll']['title']; ?></p>
@@ -257,8 +301,8 @@ function dyamar_polls_render($poll)
 		if ($total_votes > 0)
 		{
 			$percentage = round($answer['votes'] / ($total_votes / 100.0), 2);
-		}	
-		
+		}
+
 ?>
 			<div class="poll-info-line">
 				<label class="poll-label"><b><?php echo $answer['title']; ?></b></label>
@@ -276,17 +320,17 @@ function dyamar_polls_render($poll)
 					<div class="poll-info"><?php echo $percentage; ?>%, <?php echo $answer['votes']; ?> votes</div>
 <?php
 		}
-		
+
 		if ($percentage <= 0)
 		{
 ?>
-					<div class="poll-percentage" style="width:3px;"></div>
+					<div class="poll-bar-background" style="width:3px;"></div>
 <?php
 		}
 		else
 		{
 ?>
-					<div class="poll-percentage" style="width:<?php echo $percentage; ?>%;"></div>
+					<div class="poll-bar-background" style="width:<?php echo $percentage; ?>%;"></div>
 <?php
 		}
 ?>
@@ -305,7 +349,7 @@ function dyamar_polls_render($poll)
 <?php
 }
 
-function drupal_polls_delete_poll($id)
+function dyamar_polls_delete_poll($id)
 {
 	global $wpdb;
 
@@ -315,7 +359,7 @@ function drupal_polls_delete_poll($id)
 	$wpdb->query('DELETE FROM `' . $table_prefix . 'polls_answers` WHERE poll_id = ' . intval($id). ';');
 }
 
-function drupal_polls_edit_poll()
+function dyamar_polls_edit_poll()
 {
 	global $wpdb;
 
@@ -323,6 +367,7 @@ function drupal_polls_edit_poll()
 
 	if (	!empty($_POST['poll_id']) &&
 			!empty($_POST['title']) &&
+			!empty($_POST['theme']) &&
 			!empty($_POST['answer_type']) &&
 			!empty($_POST['answers']) &&
 			is_array($_POST['answers']) &&
@@ -360,13 +405,16 @@ function drupal_polls_edit_poll()
 		}
 
 		// Update data in the database
+		$styles = array();
+		$styles['theme'] = esc_sql($_POST['theme']);
+
 		$wpdb->query('
 			UPDATE `' . $table_prefix . 'polls`
-			SET `title` = \'' . $_POST['title'] . '\', `max_answers` = ' . $max_answers . ', `lifetime` = ' . $lifetime . '
-			WHERE `id` = ' . $_POST['poll_id'] . ';
+			SET `title` = \'' . esc_sql($_POST['title']) . '\', `max_answers` = ' . $max_answers . ', `lifetime` = ' . $lifetime . ', `style` = \'' . serialize($styles) . '\'
+			WHERE `id` = ' . intval($_POST['poll_id']) . ';
 		');
-		
-		$new_poll_id = $_POST['poll_id'];
+
+		$new_poll_id = intval($_POST['poll_id']);
 
 		foreach ($_POST['answers'] as $key => $answer)
 		{
@@ -401,7 +449,7 @@ function drupal_polls_edit_poll()
 	}
 }
 
-function drupal_polls_insert_new_poll()
+function dyamar_polls_insert_new_poll()
 {
 /*
 
@@ -445,12 +493,20 @@ Array
 		}
 
 		$lifetime = intval($_POST['revote_time']);
+
+		$styles = array();
+		$styles['theme'] = 'blue';
+	
+		if (!empty($_POST['theme']))
+		{
+			$styles['theme'] = esc_sql($_POST['theme']);
+		}
 	
 		$wpdb->query('
 			INSERT INTO `' . $table_prefix . 'polls`
-			(`created`, `title`, `max_answers`, `lifetime`)
+			(`created`, `title`, `max_answers`, `lifetime`, `style`)
 			VALUES
-			(NOW(), \'' . $_POST['title'] . '\', ' . $max_answers . ', ' . $lifetime . ');
+			(NOW(), \'' . esc_sql($_POST['title']) . '\', ' . $max_answers . ', ' . $lifetime . ', \'' . serialize($styles) . '\');
 		');
 		
 		$new_poll_id = $wpdb->insert_id;
@@ -502,16 +558,16 @@ function dyamar_polls_page()
 	{
 		if (!empty($_POST['poll_id']))
 		{
-			drupal_polls_edit_poll();
+			dyamar_polls_edit_poll();
 		}
 		else
 		{
-			drupal_polls_insert_new_poll();
+			dyamar_polls_insert_new_poll();
 		}
 	}
 	else if (!empty($_GET['delete']))
 	{
-		drupal_polls_delete_poll($_GET['delete']);
+		dyamar_polls_delete_poll($_GET['delete']);
 	}
 
 	$seconds_per_day = 86400;
@@ -540,6 +596,19 @@ function dyamar_polls_page()
 			<p><label>Type</label></p>
 			<p><label><input type="radio" name="answer_type" id="answer_type" value="one" checked="checked"/>Only one answer is allowed</label></p>
 			<p><label><input type="radio" name="answer_type" id="answer_type" value="any"/>Multiple answers are allowed</label></p>
+			<p><label>Theme:</label></p>
+			<p>
+				<select id="theme" name="theme">
+					<option value="black">Black</option>
+					<option value="blue" selected="selected">Blue</option>
+					<option value="brown">Brown</option>
+					<option value="gray">Gray</option>
+					<option value="green">Green</option>
+					<option value="pink">Pink</option>
+					<option value="red">Red</option>
+					<option value="yellow">Yellow</option>
+				</select>
+			</p>
 			<p><label>Revote is allowed every:</label></p>
 			<p>
 				<select id="revote_time" name="revote_time">
@@ -571,6 +640,18 @@ function dyamar_polls_page()
 		// Loading existing poll if we are editing something
 		$poll = dyamar_polls_get($_GET['edit']);
 
+		$theme = "blue";
+
+		if (!empty($poll['poll']['style']))
+		{
+			$styles = unserialize($poll['poll']['style']);
+
+			if (is_array($styles) && !empty($styles['theme']))
+			{
+				$theme = $styles['theme'];
+			}
+		}
+
 		if (!empty($poll) && is_array($poll))
 		{
 			$max_answers = $poll['poll']['max_answers'];
@@ -589,6 +670,19 @@ function dyamar_polls_page()
 			<p><label>Type</label></p>
 			<p><label><input type="radio" name="answer_type" id="answer_type" value="one"<?php echo (($max_answers == 1) ? ' checked="checked"' : ''); ?>/>Only one answer is allowed</label></p>
 			<p><label><input type="radio" name="answer_type" id="answer_type" value="any"<?php echo (($max_answers == 0) ? ' checked="checked"' : ''); ?>/>Multiple answers are allowed</label></p>
+			<p><label>Theme:</label></p>
+			<p>
+				<select id="theme" name="theme">
+					<option value="black"<?php echo ($theme == 'black' ? ' selected="selected"' : '');?>>Black</option>
+					<option value="blue"<?php echo ($theme == 'blue' ? ' selected="selected"' : '');?>>Blue</option>
+					<option value="brown"<?php echo ($theme == 'brown' ? ' selected="selected"' : '');?>>Brown</option>
+					<option value="gray"<?php echo ($theme == 'gray' ? ' selected="selected"' : '');?>>Gray</option>
+					<option value="green"<?php echo ($theme == 'green' ? ' selected="selected"' : '');?>>Green</option>
+					<option value="pink"<?php echo ($theme == 'pink' ? ' selected="selected"' : '');?>>Pink</option>
+					<option value="red"<?php echo ($theme == 'red' ? ' selected="selected"' : '');?>>Red</option>
+					<option value="yellow"<?php echo ($theme == 'yellow' ? ' selected="selected"' : '');?>>Yellow</option>
+				</select>
+			</p>
 			<p><label>Revote is allowed every:</label></p>
 			<p>
 				<select id="revote_time" name="revote_time">
@@ -707,6 +801,7 @@ function dyamar_polls_page()
 				<th>Title</th>
 				<th>Created</th>
 				<th>Shortcode</th>
+				<th>Theme</th>
 				<th>Actions</th>
 			</tr>
 <?php
@@ -723,12 +818,25 @@ function dyamar_polls_page()
 	{
 		foreach ($polls as $poll)
 		{
+			$theme = "blue";
+
+			if (!empty($poll['style']))
+			{
+				$styles = unserialize($poll['style']);
+
+				if (is_array($styles) && !empty($styles['theme']))
+				{
+					$theme = $styles['theme'];
+				}
+			}
+
 ?>
 			<tr>
 				<td class="id"><?php echo $poll['id']; ?></td>
 				<td><?php echo $poll['title']; ?></td>
 				<td><?php echo $poll['created']; ?></td>
 				<td class="shortcode"><b>[dyamar_poll id="<?php echo $poll['id']; ?>"]</b></td>
+				<td class="theme"><?php echo ucwords($theme); ?></b></td>
 				<td class="actions">
 					<a href="<?php echo add_query_arg(array('edit' => $poll['id']), $request_main); ?>" title="Edit">Edit</a>
 					<a href="<?php echo add_query_arg(array('delete' => $poll['id']), $request_main); ?>" title="Delete" onclick="return confirm('Are you sure?');">Delete</a>
