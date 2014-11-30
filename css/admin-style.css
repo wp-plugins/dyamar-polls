@@ -1,0 +1,152 @@
+/*
+
+	DYAMAR Polls - interactive polls for WordPress web sites
+	Copyright (C) 2014  DYAMAR Engineering <info@dyamar.com>
+
+	This program is free software; you can redistribute it and/or
+	modify it under the terms of the GNU General Public License
+	as published by the Free Software Foundation; either version 2
+	of the License, or (at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+*/
+
+.info-area
+{
+	float:right;
+	width:30%;
+	padding:0px;
+	margin:0px;
+}
+
+.info-widget
+{
+	margin:0px 25px 0px 0px;
+}
+
+.list-content
+{
+	margin:0px 25px 0px 0px;
+	border-radius:9px;
+	border:2px solid #E0E0E0;
+	padding:15px;
+	background:#FFFFFF;
+}
+
+.list-area
+{
+	float:left;
+	width:70%;
+	padding:0px;
+	margin:0px;
+}
+
+.data-table
+{
+	border:2px solid #E0E0E0;
+	margin:20px 0px 0px 0px;
+	width:100%;
+}
+
+.data-table tr:nth-child(odd) {
+    background-color: #F7F7FF;
+}
+
+.data-table .id,
+.data-table .actions,
+.data-table .shortcode
+{
+	text-align:center;
+	white-space:nowrap;
+}
+
+.data-table .shortcode
+{
+	min-width:150px;
+}
+
+.data-table .actions a
+{
+	margin:0px 2px;
+}
+
+.data-table th
+{
+	background:#E5E5E5;
+}
+
+.data-table th, .data-table td
+{
+	padding:5px;
+}
+
+.main-area
+{
+	overflow:hidden;
+}
+
+.new-poll
+{
+	padding:5px 15px;
+	background:#FFFFFF;
+	margin:0px 25px 25px 0px;
+	border-radius:9px;
+	border:2px solid #E0E0E0;
+}
+
+.new-poll input
+{
+	padding: 3px 8px;
+	line-height:1.4em;
+}
+
+.info-header
+{
+	text-align:left;
+	background:#ffffff;
+	padding:8px 0px 8px 30px;
+	font-size:120%;
+	font-weight:bold;
+	margin:0px;
+	border-top-left-radius:9px;
+	border-top-right-radius:9px;
+	border-left: 2px solid #E0E0E0;
+	border-right: 2px solid #E0E0E0;
+	border-top: 2px solid #E0E0E0;
+}
+
+.info-content
+{
+	padding: 10px 5px;
+	margin:0px 0px 25px 0px;
+	border-left: 2px solid #E0E0E0;
+	border-right: 2px solid #E0E0E0;
+	border-bottom: 2px solid #E0E0E0;
+	border-bottom-left-radius:9px;
+	border-bottom-right-radius:9px;
+	background:#F6F6F6;
+}
+
+.info-content p
+{
+	margin:0px;
+	padding:10px;
+}
+
+.poll-hint
+{
+	margin:10px 0px 0px 0px;
+}
+
+.poll-button-save
+{
+	margin-right:10px;
+}
