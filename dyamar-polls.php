@@ -7,12 +7,12 @@
 	Author: DYAMAR Engineering
 	Author URI: http://dyamar.com/
 	Text Domain: dyamar-polls
-	Version: 1.1.0
+	Version: 1.1.1
 	License: GNU General Public License v2 or later
 	License URI: http://www.gnu.org/licenses/gpl-2.0.html
  */
 
-define("DYAMAR_POLLS_VERSION", "1.1.0");
+define("DYAMAR_POLLS_VERSION", "1.1.1");
 define("DYAMAR_POLLS_ADMIN_PAGE", "dyamar_polls");
 
 // Add actions that are required by our plugin
@@ -228,6 +228,8 @@ function dyamar_polls_get_all_count()
 
 function dyamar_polls_render($poll)
 {
+	$result = '';
+
 	$already_voted = trim(strtolower($_COOKIE['POLL_' . $poll['poll']['id'] . '_VOTED'])) == 'yes';
 
 	$theme = "blue";
@@ -242,15 +244,15 @@ function dyamar_polls_render($poll)
 		}
 	}
 
-?>
-<div id="dyamar_poll_<?php echo $poll['poll']['id']; ?>" class="dyamar-poll theme-<?php echo $theme; ?> poll-<?php echo $poll['poll']['id']; ?>">
-	<input type="hidden" id="poll_<?php echo $poll['poll']['id']; ?>_lifetime" value="<?php echo $poll['poll']['lifetime']; ?>"/>
+	$result .= '
+<div id="dyamar_poll_' . $poll['poll']['id'] . '" class="dyamar-poll theme-' . $theme . ' poll-' . $poll['poll']['id'] . '">
+	<input type="hidden" id="poll_' . $poll['poll']['id'] . '_lifetime" value="' . $poll['poll']['lifetime'] . '"/>
 	<div class="title">
-		<p><?php echo $poll['poll']['title']; ?></p>
+		<p>' . $poll['poll']['title'] . '</p>
 	</div>
-	<div class="poll-content"<?php echo ($already_voted ? ' style="display:none;"' : ''); ?>>
+	<div class="poll-content"' . ($already_voted ? ' style="display:none;"' : '') . '>
 		<div class="poll-answers">
-<?php
+';
 
 	$max_answers = $poll['poll']['max_answers'];
 
@@ -258,30 +260,30 @@ function dyamar_polls_render($poll)
 	{
 		if ($max_answers == 1)
 		{
-?>
-			<p><label><input type="radio" id="answer_<?php echo $answer['answer_id']; ?>" name="answer"/>&nbsp;&nbsp;<?php echo $answer['title']; ?></label></p>
-<?php
+	$result .= '
+			<p><label><input type="radio" id="answer_' . $answer['answer_id'] . '" name="answer"/>&nbsp;&nbsp;' . $answer['title'] . '</label></p>
+';
 		}
 		else
 		{
-?>
-			<p><label><input type="checkbox" id="answer_<?php echo $answer['answer_id']; ?>"/>&nbsp;&nbsp;<?php echo $answer['title']; ?></label></p>
-<?php
+	$result .= '
+			<p><label><input type="checkbox" id="answer_' . $answer['answer_id'] . '"/>&nbsp;&nbsp;' . $answer['title'] . '</label></p>
+';
 		}
 	}
 
-?>
+	$result .= '
 		</div>
 		<div class="actions">
-			<p><button onclick="dyamar_polls_send_vote(<?php echo $poll['poll']['id'] . ',\'' . admin_url('admin-ajax.php') . '\''; ?>);">Vote!</button></p>
+			<p><button onclick="dyamar_polls_send_vote(' . $poll['poll']['id'] . ',\'' . admin_url('admin-ajax.php') . '\'' . ');">Vote!</button></p>
 		</div>
 		<div class="other">
-			<p><a href="#" title="View results" onclick="return dyamar_polls_view_result(<?php echo $poll['poll']['id']; ?>)">View results</a></p>
+			<p><a href="#" title="View results" onclick="return dyamar_polls_view_result(' . $poll['poll']['id'] . ')">View results</a></p>
 		</div>
 	</div>
-	<div class="poll-result"<?php echo ($already_voted ? '': ' style="display:none;"');?>>
+	<div class="poll-result"' . ($already_voted ? '': ' style="display:none;"') . '>
 		<div class="poll-data">
-<?php
+';
 
 	// Get total number of votes
 	$total_votes = 0;
@@ -303,50 +305,51 @@ function dyamar_polls_render($poll)
 			$percentage = round($answer['votes'] / ($total_votes / 100.0), 2);
 		}
 
-?>
+	$result .= '
 			<div class="poll-info-line">
-				<label class="poll-label"><b><?php echo $answer['title']; ?></b></label>
-				<div id="poll_bar_<?php echo $answer['answer_id']; ?>" class="poll-bar">
-<?php
+				<label class="poll-label"><b>' . $answer['title'] . '</b></label>
+				<div id="poll_bar_' . $answer['answer_id'] . '" class="poll-bar">
+';
 		if ($answer['votes'] == 1)
 		{
-?>
-					<div class="poll-info"><?php echo $percentage; ?>%, <?php echo $answer['votes']; ?> vote</div>
-<?php
+	$result .= '
+					<div class="poll-info">' . $percentage . '%, ' . $answer['votes'] . ' vote</div>
+';
 		}
 		else
 		{
-?>
-					<div class="poll-info"><?php echo $percentage; ?>%, <?php echo $answer['votes']; ?> votes</div>
-<?php
+	$result .= '
+					<div class="poll-info">' . $percentage . '%, ' . $answer['votes'] . ' votes</div>
+';
 		}
 
 		if ($percentage <= 0)
 		{
-?>
+	$result .= '
 					<div class="poll-bar-background" style="width:3px;"></div>
-<?php
+';
 		}
 		else
 		{
-?>
-					<div class="poll-bar-background" style="width:<?php echo $percentage; ?>%;"></div>
-<?php
+	$result .= '
+					<div class="poll-bar-background" style="width:' . $percentage . '%;"></div>
+';
 		}
-?>
+	$result .= '
 				</div>
 			</div>
-<?php
+';
 	}
-
-?>
+	$result .= '
 		</div>
 		<div class="other">
-			<p><a href="#" id="poll_<?php echo $poll['poll']['id']; ?>_view_answers"<?php echo ($already_voted ? ' style="display:none;"' : ''); ?> title="View answers" onclick="return dyamar_polls_view_answers(<?php echo $poll['poll']['id']; ?>)">View answers</a></p>
+			<p><a href="#" id="poll_' . $poll['poll']['id'] . '_view_answers"' . ($already_voted ? ' style="display:none;"' : '') . ' title="View answers" onclick="return dyamar_polls_view_answers(' . $poll['poll']['id'] . ')">View answers</a></p>
 		</div>
 	</div>
 </div>
-<?php
+';
+
+	return $result;
 }
 
 function dyamar_polls_delete_poll($id)

@@ -2,8 +2,8 @@
 Contributors: dyamar
 Tags: poll, vote, dyamar, feedback, rating, review
 Requires at least: 3.2
-Tested up to: 4.1
-Stable tag: 1.1.0
+Tested up to: 4.1.1
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,6 +43,10 @@ Yes, we do, we use that to send answers to the web site and save it in MySQL dat
 Just copy short-code from the admin section of the Poll plugin and paste it into desired page or widget.
 
 == Changelog ==
+
+= 1.1.1 =
+* Bug fix: JavaScript should correctly generate HTML code for the poll widget.
+* Bug fix: Poll widget should be correctly positioned in case if it is used inside of post.
 
 = 1.1.0 =
 * Ability to set different color schemes for polls.
