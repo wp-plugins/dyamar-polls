@@ -104,11 +104,11 @@ function dyamar_polls_send_vote(poll_id, ajaxurl)
 
 							if (percentage <= 0)
 							{
-								new_html += '<div class="poll-percentage" style="width:3px;"></div>';
+								new_html += '<div class="poll-bar-background" style="width:3px;"></div>';
 							}
 							else
 							{
-								new_html += '<div class="poll-percentage" style="width:' + percentage + '%;"></div>';
+								new_html += '<div class="poll-bar-background" style="width:' + percentage + '%;"></div>';
 							}
 							
 							poll_bar.html(new_html);
