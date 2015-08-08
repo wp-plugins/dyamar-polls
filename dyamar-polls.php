@@ -7,12 +7,12 @@
 	Author: DYAMAR Engineering
 	Author URI: http://dyamar.com/
 	Text Domain: dyamar-polls
-	Version: 1.1.2
+	Version: 1.2.0
 	License: GNU General Public License v2 or later
 	License URI: http://www.gnu.org/licenses/gpl-2.0.html
  */
 
-define("DYAMAR_POLLS_VERSION", "1.1.2");
+define("DYAMAR_POLLS_VERSION", "1.2.0");
 define("DYAMAR_POLLS_ADMIN_PAGE", "dyamar_polls");
 
 // Add actions that are required by our plugin
@@ -240,18 +240,22 @@ function dyamar_widgets_init()
 
 function dyamar_polls_vote()
 {
-	if (!empty($_POST['poll_id']) && !empty($_POST['answer_ids']) && is_array($_POST['answer_ids']))
+	$result = array();
+
+	if (	!empty($_POST['dyamar_poll_id']) &&
+			!empty($_POST['dyamar_poll_answer_ids']) &&
+			is_array($_POST['dyamar_poll_answer_ids']))
 	{
 		global $wpdb;
 
 		$table_prefix = $wpdb->prefix . 'dyamar_';
 		
-		foreach ($_POST['answer_ids'] as $answer_id)
+		foreach ($_POST['dyamar_poll_answer_ids'] as $answer_id)
 		{
 			$wpdb->query('
 				UPDATE `' . $table_prefix . 'polls_answers`
 				SET `votes` = (votes+1)
-				WHERE `poll_id` = ' . intval($_POST['poll_id']) . ' AND `answer_id` = ' . intval($answer_id) . ';
+				WHERE `poll_id` = ' . intval($_POST['dyamar_poll_id']) . ' AND `answer_id` = ' . intval($answer_id) . ';
 			');
 		}
 		
@@ -260,12 +264,18 @@ function dyamar_polls_vote()
 		
 		$result['answers'] = $wpdb->get_results('
 			SELECT votes, answer_id FROM `' . $table_prefix . 'polls_answers`
-			WHERE `poll_id` = ' . intval($_POST['poll_id']) . '
+			WHERE `poll_id` = ' . intval($_POST['dyamar_poll_id']) . '
 			ORDER BY answer_id ASC;
 		', ARRAY_A);
 
 		echo json_encode($result);
+		
+		exit;
 	}
+
+	$result['status'] = 'error';
+
+	echo json_encode($result);
 
 	exit;
 }
@@ -352,7 +362,7 @@ function dyamar_polls_render($poll)
 
 	if (!empty($poll['poll']['lifetime']) && (intval($poll['poll']['lifetime']) > 0))
 	{
-		$already_voted = trim(strtolower($_COOKIE['POLL_' . $poll['poll']['id'] . '_VOTED'])) == 'yes';
+		$already_voted = trim(strtolower($_COOKIE['DYAMAR_POLL_' . $poll['poll']['id'] . '_VOTED'])) == 'yes';
 	}
 
 	$theme = "blue";
@@ -368,13 +378,13 @@ function dyamar_polls_render($poll)
 	}
 
 	$result .= '
-<div id="dyamar_poll_' . $poll['poll']['id'] . '" class="dyamar-poll theme-' . $theme . ' poll-' . $poll['poll']['id'] . '">
-	<input type="hidden" id="poll_' . $poll['poll']['id'] . '_lifetime" value="' . $poll['poll']['lifetime'] . '"/>
-	<div class="title">
+<div id="dyamar_poll_' . $poll['poll']['id'] . '" class="dyamar-poll dyamar-poll-theme-' . $theme . ' dyamar-poll-' . $poll['poll']['id'] . '">
+	<input type="hidden" id="dyamar_poll_' . $poll['poll']['id'] . '_lifetime" value="' . $poll['poll']['lifetime'] . '"/>
+	<div class="dyamar-poll-title">
 		<p>' . esc_html(stripslashes($poll['poll']['title'])) . '</p>
 	</div>
-	<div class="poll-content"' . ($already_voted ? ' style="display:none;"' : '') . '>
-		<div class="poll-answers">
+	<div class="dyamar-poll-content"' . ($already_voted ? ' style="display:none;"' : '') . '>
+		<div class="dyamar-poll-answers">
 ';
 
 	$max_answers = $poll['poll']['max_answers'];
@@ -384,28 +394,35 @@ function dyamar_polls_render($poll)
 		if ($max_answers == 1)
 		{
 	$result .= '
-			<p><label><input type="radio" id="answer_' . $answer['answer_id'] . '" name="answer"/>&nbsp;&nbsp;' . esc_html(stripslashes($answer['title'])) . '</label></p>
+			<p><label><input type="radio" id="dyamar_poll_answer_' . $answer['answer_id'] . '" name="dyamar_poll_answer"/>&nbsp;&nbsp;' . esc_html(stripslashes($answer['title'])) . '</label></p>
 ';
 		}
 		else
 		{
 	$result .= '
-			<p><label><input type="checkbox" id="answer_' . $answer['answer_id'] . '"/>&nbsp;&nbsp;' . stripslashes(($answer['title'])) . '</label></p>
+			<p><label><input type="checkbox" id="dyamar_poll_answer_' . $answer['answer_id'] . '"/>&nbsp;&nbsp;' . stripslashes(($answer['title'])) . '</label></p>
 ';
 		}
 	}
 
 	$result .= '
-		</div>
-		<div class="actions">
+		</div>';
+
+	if (count($poll['answers']) > 0)
+	{
+		$result .= '
+		<div class="dyamar-poll-actions">
 			<p><button onclick="dyamar_polls_send_vote(' . $poll['poll']['id'] . ',\'' . admin_url('admin-ajax.php') . '\'' . ');">' . __('Vote!', 'dyamar-polls') . '</button></p>
-		</div>
-		<div class="other">
+		</div>';
+	}
+
+	$result .= '
+		<div class="dyamar-poll-other">
 			<p><a href="#" title="' . __('View results', 'dyamar-polls') . '" onclick="return dyamar_polls_view_result(' . $poll['poll']['id'] . ')">' . __('View results', 'dyamar-polls') . '</a></p>
 		</div>
 	</div>
-	<div class="poll-result"' . ($already_voted ? '': ' style="display:none;"') . '>
-		<div class="poll-data">
+	<div class="dyamar-poll-result"' . ($already_voted ? '': ' style="display:none;"') . '>
+		<div class="dyamar-poll-data">
 ';
 
 	// Get total number of votes
@@ -429,33 +446,33 @@ function dyamar_polls_render($poll)
 		}
 
 	$result .= '
-			<div class="poll-info-line">
-				<label class="poll-label"><b>' . esc_html(stripslashes($answer['title'])) . '</b></label>
-				<div id="poll_bar_' . $answer['answer_id'] . '" class="poll-bar">
+			<div class="dyamar-poll-line">
+				<label class="dyamar-poll-label"><b>' . esc_html(stripslashes($answer['title'])) . '</b></label>
+				<div id="dyamar_poll_bar_' . $answer['answer_id'] . '" class="dyamar-poll-bar">
 ';
 		if ($answer['votes'] == 1)
 		{
 	$result .= '
-					<div class="poll-info">' . $percentage . '%, ' . $answer['votes'] . ' ' . __('vote', 'dyamar-polls') . '</div>
+					<div class="dyamar-poll-info">' . $percentage . '%, ' . $answer['votes'] . ' ' . __('vote', 'dyamar-polls') . '</div>
 ';
 		}
 		else
 		{
 	$result .= '
-					<div class="poll-info">' . $percentage . '%, ' . $answer['votes'] . ' ' . __('votes', 'dyamar-polls') . '</div>
+					<div class="dyamar-poll-info">' . $percentage . '%, ' . $answer['votes'] . ' ' . __('votes', 'dyamar-polls') . '</div>
 ';
 		}
 
 		if ($percentage <= 0)
 		{
 	$result .= '
-					<div class="poll-bar-background" style="width:3px;"></div>
+					<div class="dyamar-poll-bar-bg" style="width:3px;"></div>
 ';
 		}
 		else
 		{
 	$result .= '
-					<div class="poll-bar-background" style="width:' . $percentage . '%;"></div>
+					<div class="dyamar-poll-bar-bg" style="width:' . $percentage . '%;"></div>
 ';
 		}
 	$result .= '
@@ -465,8 +482,8 @@ function dyamar_polls_render($poll)
 	}
 	$result .= '
 		</div>
-		<div class="other">
-			<p><a href="#" id="poll_' . $poll['poll']['id'] . '_view_answers"' . ($already_voted ? ' style="display:none;"' : '') . ' title="' . __('View answers', 'dyamar-polls') . '" onclick="return dyamar_polls_view_answers(' . $poll['poll']['id'] . ')">' . __('View answers', 'dyamar-polls') . '</a></p>
+		<div class="dyamar-poll-other">
+			<p><a href="#" id="dyamar_poll_' . $poll['poll']['id'] . '_view_answers"' . ($already_voted ? ' style="display:none;"' : '') . ' title="' . __('View answers', 'dyamar-polls') . '" onclick="return dyamar_polls_view_answers(' . $poll['poll']['id'] . ')">' . __('View answers', 'dyamar-polls') . '</a></p>
 		</div>
 	</div>
 </div>
@@ -491,40 +508,40 @@ function dyamar_polls_edit_poll()
 
 	$table_prefix = $wpdb->prefix . 'dyamar_';
 
-	if (	!empty($_POST['poll_id']) &&
-			!empty($_POST['title']) &&
-			!empty($_POST['theme']) &&
-			!empty($_POST['answer_type']) &&
-			!empty($_POST['answers']) &&
-			is_array($_POST['answers']) &&
-			(count($_POST['answers']) > 0)
+	if (	!empty($_POST['dyamar_poll_id']) &&
+			!empty($_POST['dyamar_poll_title']) &&
+			!empty($_POST['dyamar_poll_theme']) &&
+			!empty($_POST['dyamar_poll_answer_type']) &&
+			!empty($_POST['dyamar_poll_answers']) &&
+			is_array($_POST['dyamar_poll_answers']) &&
+			(count($_POST['dyamar_poll_answers']) > 0)
 		)
 	{
 		$max_answers = 0;
 		$lifetime = 0;
 
-		if ($_POST['answer_type'] === 'one')
+		if ($_POST['dyamar_poll_answer_type'] === 'one')
 		{
 			$max_answers = 1;
 		}
-		else if ($_POST['answer_type'] === 'any')
+		else if ($_POST['dyamar_poll_answer_type'] === 'any')
 		{
 			$max_answers = 0;
 		}
 
-		$lifetime = intval($_POST['revote_time']);
+		$lifetime = intval($_POST['dyamar_poll_revote_time']);
 
 		// Now we need to check if we has to delete some answers
 		$answers = $wpdb->get_results('
 			SELECT * FROM `' . $table_prefix . 'polls_answers`
-			WHERE `poll_id` = ' . intval($_POST['poll_id']) . ';
+			WHERE `poll_id` = ' . intval($_POST['dyamar_poll_id']) . ';
 		', ARRAY_A);
 
 		foreach ($answers as $answer)
 		{
 			$answer_id = $answer['answer_id'];
 
-			if (!in_array($answer_id, $_POST['answer_ids']))
+			if (!in_array($answer_id, $_POST['dyamar_poll_answer_ids']))
 			{
 				$wpdb->query('DELETE FROM `' . $table_prefix . 'polls_answers` WHERE answer_id = ' . intval($answer_id));
 			}
@@ -532,33 +549,33 @@ function dyamar_polls_edit_poll()
 
 		// Update data in the database
 		$styles = array();
-		$styles['theme'] = esc_sql($_POST['theme']);
+		$styles['theme'] = esc_sql($_POST['dyamar_poll_theme']);
 
 		$wpdb->query('
 			UPDATE `' . $table_prefix . 'polls`
-			SET `title` = \'' . esc_sql($_POST['title']) . '\', `max_answers` = ' . $max_answers . ', `lifetime` = ' . $lifetime . ', `style` = \'' . serialize($styles) . '\'
-			WHERE `id` = ' . intval($_POST['poll_id']) . ';
+			SET `title` = \'' . esc_sql($_POST['dyamar_poll_title']) . '\', `max_answers` = ' . $max_answers . ', `lifetime` = ' . $lifetime . ', `style` = \'' . serialize($styles) . '\'
+			WHERE `id` = ' . intval($_POST['dyamar_poll_id']) . ';
 		');
 
-		$new_poll_id = intval($_POST['poll_id']);
+		$new_poll_id = intval($_POST['dyamar_poll_id']);
 
-		foreach ($_POST['answers'] as $key => $answer)
+		foreach ($_POST['dyamar_poll_answers'] as $key => $answer)
 		{
 			if (!empty($answer))
 			{
 				$votes = 0;
 
-				if (!empty($_POST['answers_votes'][$key]))
+				if (!empty($_POST['dyamar_poll_answers_votes'][$key]))
 				{
-					$votes = intval($_POST['answers_votes'][$key]);
+					$votes = intval($_POST['dyamar_poll_answers_votes'][$key]);
 				}
 
-				if (!empty($_POST['answer_ids'][$key]) && (intval($_POST['answer_ids'][$key]) > 0))
+				if (!empty($_POST['dyamar_poll_answer_ids'][$key]) && (intval($_POST['dyamar_poll_answer_ids'][$key]) > 0))
 				{
 					$wpdb->query('
 						UPDATE `' . $table_prefix . 'polls_answers`
 						SET `title` = \'' . esc_sql($answer) . '\', votes = ' . $votes. '
-						WHERE `poll_id` = ' . intval($_POST['poll_id']) . ' AND `answer_id` = ' . intval($_POST['answer_ids'][$key]) . ';
+						WHERE `poll_id` = ' . intval($_POST['dyamar_poll_id']) . ' AND `answer_id` = ' . intval($_POST['dyamar_poll_answer_ids'][$key]) . ';
 					');
 				}
 				else
@@ -581,16 +598,14 @@ function dyamar_polls_insert_new_poll()
 
 Array
 (
-    [title] => 1312312
-    [answer_type] => one
-    [answers] => Array
+    [dyamar_poll_title] => 1312312
+    [dyamar_poll_answer_type] => one
+    [dyamar_poll_answers] => Array
         (
             [0] => 123123
             [1] => sdfsdf
             [2] => xxxx
         )
-
-    [button_save] =>
 )
 
 */
@@ -599,53 +614,53 @@ Array
 
 	$table_prefix = $wpdb->prefix . 'dyamar_';
 
-	if (	!empty($_POST['title']) &&
-			!empty($_POST['answer_type']) &&
-			!empty($_POST['answers']) &&
-			is_array($_POST['answers']) &&
-			(count($_POST['answers']) > 0)
+	if (	!empty($_POST['dyamar_poll_title']) &&
+			!empty($_POST['dyamar_poll_answer_type']) &&
+			!empty($_POST['dyamar_poll_answers']) &&
+			is_array($_POST['dyamar_poll_answers']) &&
+			(count($_POST['dyamar_poll_answers']) > 0)
 		)
 	{
 		$max_answers = 0;
 		$lifetime = 0;
 
-		if ($_POST['answer_type'] === 'one')
+		if ($_POST['dyamar_poll_answer_type'] === 'one')
 		{
 			$max_answers = 1;
 		}
-		else if ($_POST['answer_type'] === 'any')
+		else if ($_POST['dyamar_poll_answer_type'] === 'any')
 		{
 			$max_answers = 0;
 		}
 
-		$lifetime = intval($_POST['revote_time']);
+		$lifetime = intval($_POST['dyamar_poll_revote_time']);
 
 		$styles = array();
 		$styles['theme'] = 'blue';
 	
-		if (!empty($_POST['theme']))
+		if (!empty($_POST['dyamar_poll_theme']))
 		{
-			$styles['theme'] = esc_sql($_POST['theme']);
+			$styles['theme'] = esc_sql($_POST['dyamar_poll_theme']);
 		}
 	
 		$wpdb->query('
 			INSERT INTO `' . $table_prefix . 'polls`
 			(`created`, `title`, `max_answers`, `lifetime`, `style`)
 			VALUES
-			(NOW(), \'' . esc_sql($_POST['title']) . '\', ' . $max_answers . ', ' . $lifetime . ', \'' . serialize($styles) . '\');
+			(NOW(), \'' . esc_sql($_POST['dyamar_poll_title']) . '\', ' . $max_answers . ', ' . $lifetime . ', \'' . serialize($styles) . '\');
 		');
 		
 		$new_poll_id = $wpdb->insert_id;
 
-		foreach ($_POST['answers'] as $key => $answer)
+		foreach ($_POST['dyamar_poll_answers'] as $key => $answer)
 		{
 			if (!empty($answer))
 			{
 				$votes = 0;
 
-				if (!empty($_POST['answers_votes'][$key]))
+				if (!empty($_POST['dyamar_poll_answers_votes'][$key]))
 				{
-					$votes = intval($_POST['answers_votes'][$key]);
+					$votes = intval($_POST['dyamar_poll_answers_votes'][$key]);
 				}
 			
 				$wpdb->query('
@@ -682,7 +697,7 @@ function dyamar_polls_page()
 	// Save poll if that is required
 	if (!empty($_GET['save_poll']))
 	{
-		if (!empty($_POST['poll_id']))
+		if (!empty($_POST['dyamar_poll_id']))
 		{
 			dyamar_polls_edit_poll();
 		}
@@ -714,17 +729,17 @@ function dyamar_polls_page()
 ?>
 <h3><?php _e('Add new poll to your site.', 'dyamar-polls'); ?></h3>
 
-<div class="main-area">
+<div class="dyamar-polls-main">
 	<form method="post" action="<?php echo add_query_arg(array('save_poll' => 'yes'), $request_main); ?>">
-		<div class="new-poll">
+		<div class="dyamar-polls-new">
 			<p><label><?php _e('Title', 'dyamar-polls'); ?></label></p>
-			<p><input type="text" name="title" id="title" size="50"/></p>
+			<p><input type="text" class="dyamar-polls-title" name="dyamar_poll_title" id="dyamar_poll_title" size="50"/></p>
 			<p><label><?php _e('Type', 'dyamar-polls'); ?></label></p>
-			<p><label><input type="radio" name="answer_type" id="answer_type" value="one" checked="checked"/><?php _e('Only one answer is allowed', 'dyamar-polls'); ?></label></p>
-			<p><label><input type="radio" name="answer_type" id="answer_type" value="any"/><?php _e('Multiple answers are allowed', 'dyamar-polls'); ?></label></p>
+			<p><label><input type="radio" name="dyamar_poll_answer_type" id="dyamar_poll_answer_single" value="one" checked="checked"/><?php _e('Only one answer is allowed', 'dyamar-polls'); ?></label></p>
+			<p><label><input type="radio" name="dyamar_poll_answer_type" id="dyamar_poll_answer_multiple" value="any"/><?php _e('Multiple answers are allowed', 'dyamar-polls'); ?></label></p>
 			<p><label><?php _e('Theme', 'dyamar-polls'); ?></label></p>
 			<p>
-				<select id="theme" name="theme">
+				<select id="dyamar_poll_theme" name="dyamar_poll_theme">
 					<option value="black"><?php _e('Black', 'dyamar-polls'); ?></option>
 					<option value="blue" selected="selected"><?php _e('Blue', 'dyamar-polls'); ?></option>
 					<option value="brown"><?php _e('Brown', 'dyamar-polls'); ?></option>
@@ -735,9 +750,9 @@ function dyamar_polls_page()
 					<option value="yellow"><?php _e('Yellow', 'dyamar-polls'); ?></option>
 				</select>
 			</p>
-			<p><label><?php _e('Revote is allowed every:', 'dyamar-polls'); ?></label></p>
+			<p><label><?php _e('Revote is allowed every', 'dyamar-polls'); ?></label></p>
 			<p>
-				<select id="revote_time" name="revote_time">
+				<select id="dyamar_poll_revote_time" name="dyamar_poll_revote_time">
 					<option<?php echo ' value="' . $revote_immediately .'"'; ?>><?php _e('Immediately', 'dyamar-polls'); ?></option>
 					<option<?php echo ' value="' . $revote_1_day .'"'; ?>><?php _e('1 day', 'dyamar-polls'); ?></option>
 					<option<?php echo ' value="' . $revote_3_days .'"'; ?>><?php _e('3 days', 'dyamar-polls'); ?></option>
@@ -746,16 +761,16 @@ function dyamar_polls_page()
 					<option<?php echo ' value="' . $revote_1_month .'"'; ?>><?php _e('1 month', 'dyamar-polls'); ?></option>
 					<option<?php echo ' value="' . $revote_3_months .'"'; ?>><?php _e('3 months', 'dyamar-polls'); ?></option>
 					<option<?php echo ' value="' . $revote_6_months .'"'; ?>><?php _e('6 months', 'dyamar-polls'); ?></option>
-					<option<?php echo ' value="' . $revote_year .'"'; ?><?php _e('Year', 'dyamar-polls'); ?></option>
+					<option<?php echo ' value="' . $revote_year .'"'; ?>><?php _e('Year', 'dyamar-polls'); ?></option>
 				</select>
 			</p>
 			<p><label><?php _e('Answers', 'dyamar-polls'); ?></label></p>
-			<div id="answers-list">
-				<p><label class="elem-id">1. </label><span><input type="text" size="50" name="answers[]"/></span>&nbsp;&nbsp;<?php _e('Votes:', 'dyamar-polls'); ?><input type="text" size="5" name="answers_votes[]" value="0"/>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="<?php _e('Delete', 'dyamar-polls'); ?>" onclick="return dyamar_polls_delete_answer(this);"><?php _e('Delete', 'dyamar-polls'); ?></a></p>
+			<div id="dyamar_poll_answers_list">
+				<p><label class="dyamar-polls-elem">1. </label><span><input type="text" size="50" name="dyamar_poll_answers[]"/></span>&nbsp;&nbsp;<?php _e('Votes:', 'dyamar-polls'); ?><input type="text" size="5" name="dyamar_poll_answers_votes[]" value="0"/>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="<?php _e('Delete', 'dyamar-polls'); ?>" onclick="return dyamar_polls_delete_answer(this);"><?php _e('Delete', 'dyamar-polls'); ?></a></p>
 			</div>
-			<p><button name="button_add_answer" id="button_add_answer" onclick="return dyamar_polls_add_answer();"><?php _e('Add Answer', 'dyamar-polls'); ?></button></p>
+			<p><button onclick="return dyamar_polls_add_answer();"><?php _e('Add Answer', 'dyamar-polls'); ?></button></p>
 		</div>
-		<button name="button_save" id="button_save" class="poll-button-save"><?php _e('Save Poll', 'dyamar-polls'); ?></button><button onclick="return dymar_polls_cancel_button('<?php echo $request_main; ?>');"><?php _e('Cancel', 'dyamar-polls'); ?></button>
+		<button class="dyamar-polls-save"><?php _e('Save Poll', 'dyamar-polls'); ?></button><button onclick="return dymar_polls_cancel_button('<?php echo $request_main; ?>');"><?php _e('Cancel', 'dyamar-polls'); ?></button>
 	</form>
 </div>
 <?php
@@ -786,18 +801,18 @@ function dyamar_polls_page()
 ?>
 <h3><?php _e('Edit your existing poll.', 'dyamar-polls'); ?></h3>
 
-<div class="main-area">
+<div class="dyamar-polls-main">
 	<form method="post" action="<?php echo add_query_arg(array('save_poll' => 'yes'), $request_main); ?>">
-		<div class="new-poll">
-			<input type="hidden" name="poll_id" id="poll_id" value="<?php echo $poll['poll']['id']; ?>"/>
+		<div class="dyamar-polls-new">
+			<input type="hidden" name="dyamar_poll_id" id="dyamar_poll_id" value="<?php echo $poll['poll']['id']; ?>"/>
 			<p><label><?php _e('Title', 'dyamar-polls'); ?></label></p>
-			<p><input type="text" name="title" id="title" size="50" value="<?php echo esc_html(stripslashes($poll['poll']['title'])); ?>"/></p>
+			<p><input type="text" class="dyamar-polls-title" name="dyamar_poll_title" id="dyamar_poll_title" size="50" value="<?php echo esc_html(stripslashes($poll['poll']['title'])); ?>"/></p>
 			<p><label><?php _e('Type', 'dyamar-polls'); ?></label></p>
-			<p><label><input type="radio" name="answer_type" id="answer_type" value="one"<?php echo (($max_answers == 1) ? ' checked="checked"' : ''); ?>/><?php _e('Only one answer is allowed', 'dyamar-polls'); ?></label></p>
-			<p><label><input type="radio" name="answer_type" id="answer_type" value="any"<?php echo (($max_answers == 0) ? ' checked="checked"' : ''); ?>/><?php _e('Multiple answers are allowed', 'dyamar-polls'); ?></label></p>
+			<p><label><input type="radio" name="dyamar_poll_answer_type" id="dyamar_poll_answer_single" value="one"<?php echo (($max_answers == 1) ? ' checked="checked"' : ''); ?>/><?php _e('Only one answer is allowed', 'dyamar-polls'); ?></label></p>
+			<p><label><input type="radio" name="dyamar_poll_answer_type" id="dyamar_poll_answer_multiple" value="any"<?php echo (($max_answers == 0) ? ' checked="checked"' : ''); ?>/><?php _e('Multiple answers are allowed', 'dyamar-polls'); ?></label></p>
 			<p><label><?php _e('Theme', 'dyamar-polls'); ?></label></p>
 			<p>
-				<select id="theme" name="theme">
+				<select id="dyamar_poll_theme" name="dyamar_poll_theme">
 					<option value="black"<?php echo ($theme == 'black' ? ' selected="selected"' : '');?>><?php _e('Black', 'dyamar-polls'); ?></option>
 					<option value="blue"<?php echo ($theme == 'blue' ? ' selected="selected"' : '');?>><?php _e('Blue', 'dyamar-polls'); ?></option>
 					<option value="brown"<?php echo ($theme == 'brown' ? ' selected="selected"' : '');?>><?php _e('Brown', 'dyamar-polls'); ?></option>
@@ -810,7 +825,7 @@ function dyamar_polls_page()
 			</p>
 			<p><label><?php _e('Revote is allowed every', 'dyamar-polls'); ?></label></p>
 			<p>
-				<select id="revote_time" name="revote_time">
+				<select id="dyamar_poll_revote_time" name="dyamar_poll_revote_time">
 					<option<?php echo ' value="' . $revote_immediately .'"'; echo ($lifetime == $revote_immediately ? ' selected="selected"' : '');?>><?php _e('Immediately', 'dyamar-polls'); ?></option>
 					<option<?php echo ' value="' . $revote_1_day .'"'; echo ($lifetime == $revote_1_day ? ' selected="selected"' : '');?>><?php _e('1 day', 'dyamar-polls'); ?></option>
 					<option<?php echo ' value="' . $revote_3_days .'"'; echo ($lifetime == $revote_3_days ? ' selected="selected"' : '');?>><?php _e('3 days', 'dyamar-polls'); ?></option>
@@ -823,22 +838,22 @@ function dyamar_polls_page()
 				</select>
 			</p>
 			<p><label><?php _e('Answers', 'dyamar-polls'); ?></label></p>
-			<div id="answers-list">
+			<div id="dyamar_poll_answers_list">
 <?php
 		$index = 1;
 
 		foreach ($poll['answers'] as $answer)
 		{
 ?>
-				<p><label class="elem-id"><?php echo $index; ?>. </label><input type="hidden" name="answer_ids[<?php echo $index; ?>]" value="<?php echo $answer['answer_id']; ?>"/><span><input type="text" size="50" name="answers[<?php echo $index; ?>]" value="<?php echo esc_html(stripslashes($answer['title'])); ?>"/></span>&nbsp;&nbsp;<?php _e('Votes:', 'dyamar-polls'); ?><input type="text" size="5" name="answers_votes[<?php echo $index; ?>]" value="<?php echo $answer['votes']; ?>"/>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="<?php _e('Delete', 'dyamar-polls'); ?>" onclick="return dyamar_polls_delete_answer(this);"><?php _e('Delete', 'dyamar-polls'); ?></a></p>
+				<p><label class="dyamar-polls-elem"><?php echo $index; ?>. </label><input type="hidden" name="dyamar_poll_answer_ids[<?php echo $index; ?>]" value="<?php echo $answer['answer_id']; ?>"/><span><input type="text" size="50" name="dyamar_poll_answers[<?php echo $index; ?>]" value="<?php echo esc_html(stripslashes($answer['title'])); ?>"/></span>&nbsp;&nbsp;<?php _e('Votes:', 'dyamar-polls'); ?><input type="text" size="5" name="dyamar_poll_answers_votes[<?php echo $index; ?>]" value="<?php echo $answer['votes']; ?>"/>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="<?php _e('Delete', 'dyamar-polls'); ?>" onclick="return dyamar_polls_delete_answer(this);"><?php _e('Delete', 'dyamar-polls'); ?></a></p>
 <?php
 			$index++;
 		}
 ?>
 			</div>
-			<p><button name="button_add_answer" id="button_add_answer" onclick="return dyamar_polls_add_answer();"><?php _e('Add Answer', 'dyamar-polls'); ?></button></p>
+			<p><button onclick="return dyamar_polls_add_answer();"><?php _e('Add Answer', 'dyamar-polls'); ?></button></p>
 		</div>
-		<button name="button_save" id="button_save" class="poll-button-save"><?php _e('Save Poll', 'dyamar-polls'); ?></button><button onclick="return dymar_polls_cancel_button('<?php echo $request_main; ?>');"><?php _e('Cancel', 'dyamar-polls'); ?></button>
+		<button class="dyamar-polls-save"><?php _e('Save Poll', 'dyamar-polls'); ?></button><button onclick="return dymar_polls_cancel_button('<?php echo $request_main; ?>');"><?php _e('Cancel', 'dyamar-polls'); ?></button>
 	</form>
 </div>
 <?php
@@ -848,7 +863,7 @@ function dyamar_polls_page()
 ?>
 <h3><?php _e('Add new poll to your site.', 'dyamar-polls'); ?></h3>
 
-<div class="main-area">
+<div class="dyamar-polls-main">
 	<p><b><?php _e('Error: failed to get information from the database.', 'dyamar-polls'); ?></b></p>
 </div>
 <?php
@@ -895,32 +910,32 @@ function dyamar_polls_page()
 ?>
 <h3><?php _e('List of your interactive polls.', 'dyamar-polls'); ?></h3>
 
-<div class="main-area">
+<div class="dyamar-polls-main">
 
-<div class="info-area">
-	<div class="info-widget">
-		<div class="info-header"><?php _e('About', 'dyamar-polls'); ?></div>
-		<div class="info-content">
+<div class="dyamar-polls-info">
+	<div class="dyamar-polls-widget">
+		<div class="dyamar-polls-header"><?php _e('About', 'dyamar-polls'); ?></div>
+		<div class="dyamar-polls-content">
 		<p><?php _e('This plugin was developed by the <a href="http://dyamar.com?source=wp-dyamar-polls" target="_blank" title="DYAMAR">DYAMAR Engineering</a> company.', 'dyamar-polls'); ?></p>
 		<p><?php _e('Version', 'dyamar-polls'); ?> <b><?php echo DYAMAR_POLLS_VERSION; ?></b></p>
 		<p><?php _e('Link: <a href="http://dyamar.com?source=wp-dyamar-polls" target="_blank" title="DYAMAR">http://dyamar.com</a>', 'dyamar-polls'); ?></p>
 		</div>
 	</div>
-	<div class="info-widget">
-		<div class="info-header"><?php _e('Help', 'dyamar-polls'); ?></div>
-		<div class="info-content">
+	<div class="dyamar-polls-widget">
+		<div class="dyamar-polls-header"><?php _e('Help', 'dyamar-polls'); ?></div>
+		<div class="dyamar-polls-content">
 		<p><?php _e('We are ready to help you! Our goal is to make high-quality products.', 'dyamar-polls'); ?></p>
 		<p><?php _e('Please use <a href="http://dyamar.com/contact-us?source=wp-dyamar-polls" target="_blank" title="Contact form">this contact form</a> to send us your questions.', 'dyamar-polls'); ?></p>
 		</div>
 	</div>
 </div>
 
-<div class="list-area">
-	<div class="list-content">
+<div class="dyamar-polls-list">
+	<div class="dyamar-polls-list-content">
 		<form method="post" action="<?php echo add_query_arg(array('add_poll' => 'yes'), $request_main); ?>">
 		<button><?php _e('Add New Poll', 'dyamar-polls'); ?></button>
 		<p><?php echo paginate_links($pagelink_args); ?></p>
-		<table class="data-table">
+		<table class="dyamar-polls-table">
 			<tr>
 				<th><?php _e('ID', 'dyamar-polls'); ?></th>
 				<th><?php _e('Title', 'dyamar-polls'); ?></th>
@@ -957,12 +972,12 @@ function dyamar_polls_page()
 
 ?>
 			<tr>
-				<td class="id"><?php echo $poll['id']; ?></td>
+				<td class="dyamar-polls-id"><?php echo $poll['id']; ?></td>
 				<td><?php echo esc_html(stripslashes($poll['title'])); ?></td>
 				<td><?php echo $poll['created']; ?></td>
-				<td class="shortcode"><b>[dyamar_poll id="<?php echo $poll['id']; ?>"]</b></td>
-				<td class="theme"><?php echo ucwords($theme); ?></b></td>
-				<td class="actions">
+				<td class="dyamar-polls-shortcode"><b>[dyamar_poll id="<?php echo $poll['id']; ?>"]</b></td>
+				<td class="dyamar-polls-theme"><?php echo ucwords($theme); ?></td>
+				<td class="dyamar-polls-actions">
 					<a href="<?php echo add_query_arg(array('edit' => $poll['id']), $request_main); ?>" title="<?php _e('Edit', 'dyamar-polls'); ?>"><?php _e('Edit', 'dyamar-polls'); ?></a>
 					<a href="<?php echo add_query_arg(array('delete' => $poll['id']), $request_main); ?>" title="<?php _e('Delete', 'dyamar-polls'); ?>" onclick="return confirm('<?php _e('Are you sure?', 'dyamar-polls'); ?>');"><?php _e('Delete', 'dyamar-polls'); ?></a>
 				</td>
@@ -973,7 +988,7 @@ function dyamar_polls_page()
 ?>
 		</table>
 		<p><?php echo paginate_links($pagelink_args); ?></p>
-		<div class="poll-hint"><?php _e('<b>Hint:</b> you can use generated <b>shortcodes</b> to place your poll in posts or widgets.', 'dyamar-polls'); ?></div>
+		<div class="dyamar-polls-hint"><?php _e('<b>Hint:</b> you can use generated <b>shortcodes</b> to place your polls in posts or widgets.', 'dyamar-polls'); ?></div>
 		</form>
 	</div>	
 </div>

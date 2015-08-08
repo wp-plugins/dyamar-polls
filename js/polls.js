@@ -24,7 +24,7 @@ function dyamar_polls_send_vote(poll_id, ajaxurl)
 	var has_answer = false;
 	var answer_ids = [];
 
-	jQuery("#dyamar_poll_" + poll_id + " .poll-answers input").each(function(index)
+	jQuery("#dyamar_poll_" + poll_id + " .dyamar-poll-answers input").each(function(index)
 	{
 		if (jQuery(this).prop('checked'))
 		{
@@ -34,7 +34,7 @@ function dyamar_polls_send_vote(poll_id, ajaxurl)
 			
 			if (elem_id && (elem_id.length > 0))
 			{
-				answer_ids.push(elem_id.replace('answer_', ''));
+				answer_ids.push(elem_id.replace('dyamar_poll_answer_', ''));
 			}
 		}
 	});
@@ -48,8 +48,8 @@ function dyamar_polls_send_vote(poll_id, ajaxurl)
 	
 	var data = {
 		'action': 'dyamar_polls_vote',
-		'poll_id': poll_id,
-		'answer_ids' : answer_ids
+		'dyamar_poll_id': poll_id,
+		'dyamar_poll_answer_ids' : answer_ids
 	};
 
 	jQuery.post(ajaxurl, data, function(response)
@@ -85,7 +85,7 @@ function dyamar_polls_send_vote(poll_id, ajaxurl)
 							percentage = Math.round((parseFloat(answers[index]['votes']) / (total_votes / 100.0)) * 100) / 100;
 						}
 
-						var poll_bar = jQuery("#dyamar_poll_" + poll_id + " #poll_bar_" + answer_id);
+						var poll_bar = jQuery("#dyamar_poll_" + poll_id + " #dyamar_poll_bar_" + answer_id);
 
 						if (poll_bar && (poll_bar.length > 0))
 						{
@@ -95,20 +95,20 @@ function dyamar_polls_send_vote(poll_id, ajaxurl)
 
 							if (votes == 1)
 							{
-								new_html += '<div class="poll-info">' + percentage + '%, ' + votes + ' vote</div>';
+								new_html += '<div class="dyamar-poll-info">' + percentage + '%, ' + votes + ' vote</div>';
 							}
 							else
 							{
-								new_html += '<div class="poll-info">' + percentage + '%, ' + votes + ' votes</div>';
+								new_html += '<div class="dyamar-poll-info">' + percentage + '%, ' + votes + ' votes</div>';
 							}
 
 							if (percentage <= 0)
 							{
-								new_html += '<div class="poll-bar-background" style="width:3px;"></div>';
+								new_html += '<div class="dyamar-poll-bar-bg" style="width:3px;"></div>';
 							}
 							else
 							{
-								new_html += '<div class="poll-bar-background" style="width:' + percentage + '%;"></div>';
+								new_html += '<div class="dyamar-poll-bar-bg" style="width:' + percentage + '%;"></div>';
 							}
 							
 							poll_bar.html(new_html);
@@ -117,7 +117,7 @@ function dyamar_polls_send_vote(poll_id, ajaxurl)
 				}
 			}
 
-			var lifetime_elem = jQuery("#poll_" + poll_id + "_lifetime");
+			var lifetime_elem = jQuery("#dyamar_poll_" + poll_id + "_lifetime");
 
 			if (lifetime_elem && (lifetime_elem.length > 0))
 			{
@@ -128,9 +128,9 @@ function dyamar_polls_send_vote(poll_id, ajaxurl)
 					var currentDate = new Date();
     				currentDate.setTime(currentDate.getTime() + lifetime * 1000);
     				var expires = "expires="+currentDate.toGMTString();
-		    		document.cookie = "POLL_" + poll_id + "_VOTED=YES; " + expires;
-		    		
-		    		jQuery("#poll_" + poll_id + "_view_answers").hide();
+		    		document.cookie = "DYAMAR_POLL_" + poll_id + "_VOTED=YES; " + expires + "; path=/";
+
+		    		jQuery("#dyamar_poll_" + poll_id + "_view_answers").hide();
 
 		    		dyamar_polls_view_result(poll_id);
 		    	}
@@ -145,16 +145,16 @@ function dyamar_polls_send_vote(poll_id, ajaxurl)
 
 function dyamar_polls_view_result(poll_id)
 {
-	jQuery("#dyamar_poll_" + poll_id + " .poll-content").hide();
-	jQuery("#dyamar_poll_" + poll_id + " .poll-result").show();
+	jQuery("#dyamar_poll_" + poll_id + " .dyamar-poll-content").hide();
+	jQuery("#dyamar_poll_" + poll_id + " .dyamar-poll-result").show();
 
 	return false;
 }
 
 function dyamar_polls_view_answers(poll_id)
 {
-	jQuery("#dyamar_poll_" + poll_id + " .poll-result").hide();
-	jQuery("#dyamar_poll_" + poll_id + " .poll-content").show();
+	jQuery("#dyamar_poll_" + poll_id + " .dyamar-poll-result").hide();
+	jQuery("#dyamar_poll_" + poll_id + " .dyamar-poll-content").show();
 	
 	return false;
 }

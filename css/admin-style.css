@@ -19,134 +19,149 @@
 
 */
 
-.info-area
+.dyamar-polls-info
 {
-	float:right;
-	width:30%;
-	padding:0px;
-	margin:0px;
+	float: right;
+	width: 30%;
+	padding: 0px;
+	margin: 0px;
 }
 
-.info-widget
+.dyamar-polls-title
 {
-	margin:0px 25px 0px 0px;
+	border-color: #CCC;
+	padding: 3px 8px;
+	line-height: 1.4em;
+	font-size: 1.5em;
+	width: 100%;
+	box-sizing: border-box;
 }
 
-.list-content
+.dyamar-polls-widget
 {
-	margin:0px 25px 0px 0px;
-	border-radius:9px;
-	border:2px solid #E0E0E0;
-	padding:15px;
-	background:#FFFFFF;
+	margin: 0px 25px 0px 0px;
 }
 
-.list-area
+.dyamar-polls-list
 {
-	float:left;
-	width:70%;
-	padding:0px;
-	margin:0px;
+	float: left;
+	width: 70%;
+	padding: 0px;
+	margin: 0px;
 }
 
-.data-table
+.dyamar-polls-list-content
 {
-	border:2px solid #E0E0E0;
-	margin:20px 0px 0px 0px;
-	width:100%;
+	margin: 0px 25px 0px 0px;
+	border-radius: 9px;
+	border: 2px solid #E0E0E0;
+	padding: 15px;
+	background: #FFFFFF;
 }
 
-.data-table tr:nth-child(odd) {
+.dyamar-polls-table
+{
+	border: 2px solid #E0E0E0;
+	margin: 20px 0px 0px 0px;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.dyamar-polls-table tr:nth-child(odd)
+{
     background-color: #F7F7FF;
 }
 
-.data-table .id,
-.data-table .actions,
-.data-table .shortcode
+.dyamar-polls-id,
+.dyamar-polls-actions,
+.dyamar-polls-shortcode
 {
-	text-align:center;
-	white-space:nowrap;
+	text-align: center;
+	white-space: nowrap;
 }
 
-.data-table .shortcode
+.dyamar-polls-shortcode
 {
-	min-width:150px;
+	min-width: 150px;
 }
 
-.data-table .actions a
+.dyamar-polls-actions a
 {
-	margin:0px 2px;
+	margin: 0px 2px;
 }
 
-.data-table th
+.dyamar-polls-table th
 {
-	background:#E5E5E5;
+	background: #E5E5E5;
+	text-align: center;
+	white-space: nowrap;
 }
 
-.data-table th, .data-table td
+.dyamar-polls-table th,
+.dyamar-polls-table td
 {
-	padding:5px;
+	padding: 0.5em;
 }
 
-.main-area
+.dyamar-polls-main
 {
-	overflow:hidden;
+	overflow: hidden;
 }
 
-.new-poll
+.dyamar-polls-new
 {
-	padding:5px 15px;
-	background:#FFFFFF;
-	margin:0px 25px 25px 0px;
-	border-radius:9px;
-	border:2px solid #E0E0E0;
+	padding: 5px 15px;
+	background: #FFFFFF;
+	margin: 0px 25px 25px 0px;
+	border-radius: 9px;
+	border: 2px solid #E0E0E0;
 }
 
-.new-poll input
+.dyamar-polls-new input
 {
 	padding: 3px 8px;
-	line-height:1.4em;
+	line-height: 1.4em;
 }
 
-.info-header
+.dyamar-polls-header
 {
-	text-align:left;
-	background:#ffffff;
-	padding:8px 0px 8px 30px;
-	font-size:120%;
-	font-weight:bold;
-	margin:0px;
-	border-top-left-radius:9px;
-	border-top-right-radius:9px;
+	text-align: left;
+	background: #ffffff;
+	padding: 8px 0px 8px 30px;
+	font-size: 120%;
+	font-weight: bold;
+	margin: 0px;
+	border-top-left-radius: 9px;
+	border-top-right-radius: 9px;
 	border-left: 2px solid #E0E0E0;
 	border-right: 2px solid #E0E0E0;
 	border-top: 2px solid #E0E0E0;
 }
 
-.info-content
+.dyamar-polls-content
 {
 	padding: 10px 5px;
-	margin:0px 0px 25px 0px;
+	margin: 0px 0px 25px 0px;
 	border-left: 2px solid #E0E0E0;
 	border-right: 2px solid #E0E0E0;
 	border-bottom: 2px solid #E0E0E0;
-	border-bottom-left-radius:9px;
-	border-bottom-right-radius:9px;
-	background:#F6F6F6;
+	border-bottom-left-radius: 9px;
+	border-bottom-right-radius: 9px;
+	background: #F6F6F6;
 }
 
-.info-content p
+.dyamar-polls-content p
 {
-	margin:0px;
-	padding:10px;
+	margin: 0px;
+	padding: 10px;
 }
 
-.poll-hint
+.dyamar-polls-hint
 {
-	margin:10px 0px 0px 0px;
+	margin: 10px 0px 0px 0px;
 }
 
-.poll-button-save
+.dyamar-polls-save
 {
-	margin-right:10px;
+	margin-right: 10px;
 }

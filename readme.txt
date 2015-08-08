@@ -2,8 +2,8 @@
 Contributors: dyamar
 Tags: poll, vote, dyamar, feedback, rating, review
 Requires at least: 3.2
-Tested up to: 4.2.3
-Stable tag: 1.1.2
+Tested up to: 4.2.4
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,6 +53,14 @@ Yes, we do, we use that to send answers to the web site and save it in MySQL dat
 Just copy short-code from the admin section of the Poll plugin and paste it into desired page or widget. Or optionally, you may add 'DYAMAR Polls' widget in the 'Widgets' area of WordPress installation. In this case, you will need to select poll from drop down item and save widget.
 
 == Changelog ==
+
+= 1.2.0 =
+* Bug fix: All CSS classed and HTML ids must have dyamar_poll prefix to avoid conflicts with other code.
+* Bug fix: duplicate HTML ids on administration side.
+* Bug fix: Poll cookies must not belong to specific path, they should be site wide instead.
+* Bug fix: HTML code for administration side contained unclosed tag.
+* Compatibility with WordPress 4.2.4
+* Minor improvements to CSS to make it easy to add custom CSS styles.
 
 = 1.1.2 =
 * WordPress widget that allows to select and add polls to sidebars.
