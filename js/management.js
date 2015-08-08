@@ -21,13 +21,13 @@
 
 function dyamar_polls_add_answer()
 {
-	var elem_count = jQuery("#answers-list span input").length;
+	var elem_count = jQuery("#dyamar_poll_answers_list span input").length;
 
-	var answers_list = jQuery("#answers-list");
+	var answers_list = jQuery("#dyamar_poll_answers_list");
 
 	if (answers_list && (answers_list.length > 0))
 	{
-		answers_list.append('<p><label class="elem-id">' + (elem_count + 1) + '. </label><input type="hidden" name="answer_ids[' + (elem_count + 1) + ']" value="0"/><span><input type="text" size="50" name="answers[' + (elem_count + 1) + ']"/></span>&nbsp;&nbsp;Votes:<input type="text" size="5" name="answers_votes[' + (elem_count + 1) + ']" value="0"/>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Delete" onclick="return dyamar_polls_delete_answer(this);">Delete</a></p>');
+		answers_list.append('<p><label class="dyamar-polls-elem">' + (elem_count + 1) + '. </label><input type="hidden" name="dyamar_poll_answer_ids[' + (elem_count + 1) + ']" value="0"/><span><input type="text" size="50" name="dyamar_poll_answers[' + (elem_count + 1) + ']"/></span>&nbsp;&nbsp;Votes:<input type="text" size="5" name="dyamar_poll_answers_votes[' + (elem_count + 1) + ']" value="0"/>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" title="Delete" onclick="return dyamar_polls_delete_answer(this);">Delete</a></p>');
 	}
 
 	return false;
@@ -35,7 +35,7 @@ function dyamar_polls_add_answer()
 
 function dyamar_polls_delete_answer(source)
 {
-	var elem_count = jQuery("#answers-list span input").length;
+	var elem_count = jQuery("#dyamar_poll_answers_list span input").length;
 
 	var parent = jQuery(source).parent();
 	
@@ -53,7 +53,7 @@ function dyamar_polls_delete_answer(source)
 		}
 	}
 
-	var ids = jQuery("#answers-list .elem-id").each(function(index){
+	var ids = jQuery("#dyamar_poll_answers_list .dyamar-polls-elem").each(function(index){
 		jQuery(this).text((index + 1) + ". ");
 	});
 	
