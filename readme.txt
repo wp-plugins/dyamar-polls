@@ -1,8 +1,8 @@
 === DYAMAR Polls ===
 Contributors: dyamar
-Tags: poll, vote, dyamar, feedback, rating, review
+Tags: poll, vote, dyamar, feedback, rating, review, survey, democracy, opinion, voting, booth
 Requires at least: 3.2
-Tested up to: 4.2.4
+Tested up to: 4.3
 Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
